@@ -20,14 +20,19 @@ app.get('/health', (req, res) => {
 app.get('/api/orders', async (req, res) => {
   try {
     let sql = 'SELECT * FROM orders';
+    const params = [];
+
     if (req.query.status) {
-      sql += " WHERE status = '" + req.query.status + "'";
+      params.push(req.query.status);
+      sql += ' WHERE status = $1';
     }
+
     sql += ' ORDER BY id DESC LIMIT 100';
-    const result = await pool.query(sql);
+
+    const result = await pool.query(sql, params);
     res.json(result.rows.map(formatOrder));
   } catch (e) {
-    res.status(500).json({ error: e.message, stack: e.stack });
+    res.status(500).json({ error: e.message });
   }
 });
 
